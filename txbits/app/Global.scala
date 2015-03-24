@@ -9,6 +9,7 @@ import anorm.TypeDoesNotMatch
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient
 import controllers.IAPI.CryptoAddress
 import java.net.{ PasswordAuthentication, Authenticator, URL }
+import play.api.db.DB
 import play.api.mvc.Result
 import play.api.Play.current
 import play.filters.csrf.CSRFFilter
@@ -24,61 +25,22 @@ import play.api.libs.json.{ Json, JsObject }
 import play.libs.Akka
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
+import service.sql.misc
 import service.txbitsUserService
 import usertrust.{ UserTrustModel, UserTrustService }
 import wallet.{ WalletModel, Wallet }
 
 package object globals {
 
-  // handles parsing bigDecimal columns
-  // JDBC always gives us a java BigDecimal and we have to convert it into a scala one
-  implicit val bigDecimalColumn = anorm.Column[BigDecimal] { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
-    value match {
-      case v: java.math.BigDecimal => Right(BigDecimal(v))
-      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + ":" + value.asInstanceOf[AnyRef].getClass + " to BigDecimal for column " + qualified))
-    }
-  }
-
-  // handles parsing timestamps
-  implicit val timestampColumn = anorm.Column[DateTime] { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
-    value match {
-      case v: java.sql.Timestamp => Right(new DateTime(v))
-      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + ":" + value.asInstanceOf[AnyRef].getClass + " to TimeStamp for column " + qualified))
-    }
-  }
-
-  // handles parsing integers
-  implicit val integerColumn = anorm.Column[Integer] { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
-    value match {
-      case v: java.lang.Integer => Right(new Integer(v))
-      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + ":" + value.asInstanceOf[AnyRef].getClass + " to Integer for column " + qualified))
-    }
-  }
-
-  // handles parsing symbols
-  implicit val symbolColumn = anorm.Column[Symbol] { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
-    value match {
-      case v: String => Right(Symbol(v))
-      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + ":" + value.asInstanceOf[AnyRef].getClass + " to Symbol for column " + qualified))
-    }
-  }
-
-  // handle parsing 2d arrays of numbers
-  implicit val rowToBigDecimalArrayArray: Column[Array[Array[java.math.BigDecimal]]] = Column.nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
-    value match {
-      case o: java.sql.Array => Right(o.getArray().asInstanceOf[Array[Array[java.math.BigDecimal]]])
-      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + ":" + value.asInstanceOf[AnyRef].getClass))
-    }
-  }
-
   val masterDB = "default"
   val masterDBWallet = "wallet"
   val masterDBTrusted = "trust"
+
+  if (Play.current.configuration.getBoolean("meta.devdb").getOrElse(false)) {
+    DB.withConnection(globals.masterDB)({ implicit c =>
+      misc.devdb.execute()
+    })
+  }
 
   val userModel = new UserModel(masterDB)
   val metaModel = new MetaModel(masterDB)

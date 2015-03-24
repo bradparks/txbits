@@ -12,7 +12,7 @@ import wallet.Wallet.CryptoCurrency.CryptoCurrency
 
 class WalletModel(val db: String = "default") {
 
-  import globals.bigDecimalColumn
+  import service.anormHelpers.bigDecimalColumn
 
   def obtainSessionLock(currency: CryptoCurrency, nodeId: Int) = DB.withConnection(db) { implicit c =>
     SQLText.obtainSessionLock.on('currency -> currency.id, 'node_id -> nodeId)().map(row => row[Boolean]("pg_try_advisory_lock")).head

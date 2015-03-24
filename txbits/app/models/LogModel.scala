@@ -55,9 +55,9 @@ object LoginEvent {
 
 class LogModel(val db: String = "default") {
 
-  import globals.timestampColumn
-  import globals.bigDecimalColumn
-  import globals.integerColumn
+  import service.anormHelpers.timestampColumn
+  import service.anormHelpers.bigDecimalColumn
+  import service.anormHelpers.integerColumn
 
   def logEvent(logEvent: LogEvent) = DB.withConnection(db) { implicit c =>
     frontend.newLog.on(

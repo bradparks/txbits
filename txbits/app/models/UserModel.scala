@@ -40,9 +40,9 @@ object ApiKey {
 
 class UserModel(val db: String = "default") {
 
-  import globals.timestampColumn
-  import globals.symbolColumn
-  import globals.bigDecimalColumn
+  import service.anormHelpers.timestampColumn
+  import service.anormHelpers.symbolColumn
+  import service.anormHelpers.bigDecimalColumn
 
   def create(email: String, password: String, onMailingList: Boolean, pgp: Option[String], token: String) = DB.withConnection(db) { implicit c =>
     frontend.createUserComplete.on(

@@ -18,9 +18,9 @@ import service.sql.misc
 
 class EngineModel(val db: String = "default") {
 
-  import globals.bigDecimalColumn
-  import globals.timestampColumn
-  import globals.rowToBigDecimalArrayArray
+  import service.anormHelpers.bigDecimalColumn
+  import service.anormHelpers.timestampColumn
+  import service.anormHelpers.rowToBigDecimalArrayArray
 
   // privileged apis
 

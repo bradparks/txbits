@@ -8,7 +8,7 @@ import models.Withdrawal
 import org.joda.time.DateTime
 
 class UserTrustModel(val db: String = "default") {
-  import globals.timestampColumn
+  import service.anormHelpers.timestampColumn
 
   def getTrustedActionRequests = DB.withConnection(db) { implicit c =>
     SQLText.getTrustedActionRequests().map(row =>
